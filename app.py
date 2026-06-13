@@ -2,23 +2,13 @@ import streamlit as st
 import pandas as pd
 import requests
 import pickle
+import os
+import subprocess
 
-# Load the processed data and similarity matrix
-with open('movie_data.pkl', 'rb') as file:
-    movies, cosine_sim = pickle.load(file)
-
-def get_recommendations(title, cosine_sim=cosine_sim):
-    idx = movies[movies['title'] == title].index[0]
-    sim_scores = list(enumerate(cosine_sim[idx]))
-    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-    sim_scores = sim_scores[1:11]  # Get top 10 similar movies
-    movie_indices = [i[0] for i in sim_scores]
-    return movies[['title', 'movie_id']].iloc[movie_indices]
-
-import streamlit as st
-import pandas as pd
-import requests
-import pickle
+# Generate the data file if it doesn't exist (e.g., on first cloud deployment)
+if not os.path.exists('movie_data.pkl'):
+    with st.spinner("Initializing Data & AI Model... This may take a minute on first run."):
+        subprocess.run(["python", "generate_pickle.py"], check=True)
 
 # Load the processed data and similarity matrix
 with open('movie_data.pkl', 'rb') as file:
